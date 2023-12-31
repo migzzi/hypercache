@@ -1,6 +1,6 @@
 module github.com/migzzi/go-hypercache
 
-go 1.21.0
+go 1.19.0
 
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
