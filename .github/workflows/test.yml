@@ -1,0 +1,19 @@
+name: Test
+on: [push, pull_request]
+jobs:
+  test:
+    name: Test go package with go version ${{ matrix.go_version }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        go_version: [1.19.x]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Setup go
+        uses: actions/setup-go@v3
+        with: 
+          go-version: ${{ matrix.go_version }}
+      - name: Testing code
+        run: go test -race -count 100 ./... -coverprofile=.coverage.out
