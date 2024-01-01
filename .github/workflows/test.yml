@@ -1,5 +1,7 @@
 name: Test
 on: [push, pull_request]
+
+
 jobs:
   test:
     name: Test go package with go version ${{ matrix.go_version }} on ${{ matrix.os }}
@@ -37,4 +39,4 @@ jobs:
           go-version: ${{ matrix.go_version }}
 
       - name: Testing code
-        run: go test -race -count 100 ./... -coverprofile=.coverage.out
+        run: go test -race -cover ./...
