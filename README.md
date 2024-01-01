@@ -1,7 +1,7 @@
 # hypercache
 [![License](https://img.shields.io/github/license/migzzi/hypercache)]()
-[![Release](https://img.shields.io/github/v/release/migzzi/hypercache)](https://goreportcard.com/report/github.com/migzzi/hypercache)
-[![Build Status](https://img.shields.io/github/workflow/status/migzzi/hypercache/Test?label=tests)](https://github.com/migzzi/hypercache/actions)
+[![Release](https://img.shields.io/github/v/release/migzzi/hypercache?style=flat)](https://github.com/migzzi/hypercache/releases)
+[![Build Status](https://github.com/migzzi/hypercache/workflows/Test/badge.svg)](https://github.com/migzzi/hypercache/actions?query=branch%3Amaster)
 
 
 An in-memory cache backed by redis for cache synchronization between instances.
