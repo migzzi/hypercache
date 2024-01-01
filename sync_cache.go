@@ -88,7 +88,7 @@ type synchronizedCache struct {
 	//No of the redis channel to listen for updates.
 	updateChannelName string
 
-	mu sync.Mutex
+	mu sync.RWMutex
 
 	ctx context.Context
 
@@ -151,7 +151,10 @@ func (sc *synchronizedCache) Get(key string, dest interface{}) error {
 		cacheEntry = entry.(*redisCacheEntry)
 		slot = int(cacheEntry.keyHashSlot)
 		// Check if the entry has expired.
-		if sc.hashSlotLastUpdated[cacheEntry.keyHashSlot] < cacheEntry.lastUpdatedTimestamp {
+		sc.mu.RLock()
+		hasExpired := sc.hashSlotLastUpdated[cacheEntry.keyHashSlot] < cacheEntry.lastUpdatedTimestamp
+		sc.mu.RUnlock()
+		if hasExpired {
 			// copy struct to dest
 			// err := copyStruct(cacheEntry.value, dest)
 			err := sc.serde.deserialize(cacheEntry.value.([]byte), dest)
