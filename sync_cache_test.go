@@ -1,6 +1,7 @@
 package hypercache
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -23,6 +24,10 @@ func createRedisClient() *redis.Client {
 	},
 	)
 	return client
+}
+
+func cleanup(cache redis.UniversalClient) {
+	cache.Del(context.Background(), "*")
 }
 
 func TestCacheSyncMessageSerialize(t *testing.T) {
@@ -93,6 +98,8 @@ func TestSyncCacheAdd(t *testing.T) {
 	if _, ok := cache.inMemCache.Get("k1"); !ok {
 		t.Errorf("Should have found entry in in-memory cache")
 	}
+	cleanup(cache.clients)
+
 }
 
 func TestSyncCacheGet(t *testing.T) {
@@ -115,6 +122,8 @@ func TestSyncCacheGet(t *testing.T) {
 	if _, ok := cache.inMemCache.Get("k1"); !ok {
 		t.Errorf("Should have found entry in in-memory cache")
 	}
+	cleanup(cache.clients)
+
 }
 
 func TestSyncCacheGetNonExistent(t *testing.T) {
@@ -128,6 +137,8 @@ func TestSyncCacheGetNonExistent(t *testing.T) {
 	if err != ErrCacheMiss {
 		t.Errorf("Should have failed to get entry with ErrCacheMiss")
 	}
+
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheWithTwoClients_SecondDoesnotHaveFirstValue(t *testing.T) {
@@ -157,6 +168,9 @@ func TestSyncCacheWithTwoClients_SecondDoesnotHaveFirstValue(t *testing.T) {
 	if val != "v1" {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache1.clients)
+	cleanup(cache2.clients)
+
 }
 
 func TestSyncCacheWithTwoClients_SecondHasFirstValue(t *testing.T) {
@@ -189,6 +203,8 @@ func TestSyncCacheWithTwoClients_SecondHasFirstValue(t *testing.T) {
 	if val != "v2" {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache1.clients)
+	cleanup(cache2.clients)
 }
 
 func TestSyncCacheSetWithComplexType(t *testing.T) {
@@ -242,6 +258,7 @@ func TestSyncCacheSetWithComplexType(t *testing.T) {
 	if val2.Age != 22 {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithSliceValue(t *testing.T) {
@@ -292,6 +309,7 @@ func TestSyncCacheSetWithSliceValue(t *testing.T) {
 	if val2[1] != "v2" {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithMapValue(t *testing.T) {
@@ -334,6 +352,7 @@ func TestSyncCacheSetWithMapValue(t *testing.T) {
 	if val2["v1"] != "v2" {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithNilValue(t *testing.T) {
@@ -376,6 +395,7 @@ func TestSyncCacheSetWithNilValue(t *testing.T) {
 	if val2 != "" {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithEmptyStringValue(t *testing.T) {
@@ -418,6 +438,7 @@ func TestSyncCacheSetWithEmptyStringValue(t *testing.T) {
 	if val2 != "" {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithEmptyByteSliceValue(t *testing.T) {
@@ -460,6 +481,7 @@ func TestSyncCacheSetWithEmptyByteSliceValue(t *testing.T) {
 	if len(val3) != 0 {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithSliceOfStructsValue(t *testing.T) {
@@ -497,6 +519,7 @@ func TestSyncCacheSetWithSliceOfStructsValue(t *testing.T) {
 	if val2[1].Name != "v2" && val2[1].Age != 23 {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithMapOfStructsValue(t *testing.T) {
@@ -534,6 +557,7 @@ func TestSyncCacheSetWithMapOfStructsValue(t *testing.T) {
 	if val2["v2"].Name != "v2" && val2["v2"].Age != 23 {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithSliceOfStructsPointersValue(t *testing.T) {
@@ -571,6 +595,7 @@ func TestSyncCacheSetWithSliceOfStructsPointersValue(t *testing.T) {
 	if val2[1].Name != "v2" && val2[1].Age != 23 {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheSetWithMapOfStructsPointersValue(t *testing.T) {
@@ -608,6 +633,7 @@ func TestSyncCacheSetWithMapOfStructsPointersValue(t *testing.T) {
 	if val2["v2"].Name != "v2" && val2["v2"].Age != 23 {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
 
 func TestSyncCacheDelete(t *testing.T) {
@@ -630,4 +656,5 @@ func TestSyncCacheDelete(t *testing.T) {
 	if err != ErrCacheMiss {
 		t.Errorf("Failed to get entry")
 	}
+	cleanup(cache.clients)
 }
