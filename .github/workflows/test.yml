@@ -5,7 +5,7 @@ jobs:
     name: Test go package with go version ${{ matrix.go_version }} on ${{ matrix.os }}
     strategy:
       matrix:
-        os: ubuntu-latest
+        os: [ubuntu-latest]
         go_version: [1.19.x, 1.20.x, 1.21.x]
     runs-on: ${{ matrix.os }}
     services:
