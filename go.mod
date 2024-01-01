@@ -1,4 +1,4 @@
-module github.com/migzzi/go-hypercache
+module github.com/migzzi/hypercache
 
 go 1.19.0
 
