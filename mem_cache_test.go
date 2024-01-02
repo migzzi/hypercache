@@ -33,6 +33,28 @@ func TestMemCacheAdd(t *testing.T) {
 	}
 }
 
+func TestMemCacheAddExisting(t *testing.T) {
+	cache := newMemoryCache(100)
+	if cache == nil {
+		t.Errorf("Failed to create memory cache")
+	}
+
+	cache.Set("k1", "v1", 0)
+	cache.Set("k1", "v2", 0)
+	if cache.numEntries.Load() != 1 {
+		t.Errorf("Failed to add entry")
+	}
+
+	item := cache.list.popBack()
+	if item.value != "v2" {
+		t.Errorf("List should point to entry with value v2")
+	}
+
+	if cache.list.head != nil {
+		t.Errorf("List head should be nil")
+	}
+}
+
 func TestMemCacheGet(t *testing.T) {
 	cache := newMemoryCache(100)
 	if cache == nil {
