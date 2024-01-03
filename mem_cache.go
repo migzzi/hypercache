@@ -13,18 +13,21 @@ type cacheEntry struct {
 	value interface{}
 	// This is the time this entry was last update.
 	ttl time.Duration
+	// time at which the entry will expire
+	// expiry time is calculated as: created + ttl
+	expiresAt time.Time
 	// Time when the entry was first added.
-	created time.Time
-	// Time when the entry was last updated.
-	lastUpdated time.Time
-	// Time when the entry was last accessed.
-	lastAccessed time.Time
-	// Number of times the entry has been accessed.
-	accessCount atomic.Uint64
+	// created time.Time
+	// // Time when the entry was last updated.
+	// lastUpdated time.Time
+	// // Time when the entry was last accessed.
+	// lastAccessed time.Time
+	// // Number of times the entry has been accessed.
+	// accessCount atomic.Uint64
 }
 
 func (ce *cacheEntry) isExpired() bool {
-	return ce.ttl > 0 && time.Now().After(ce.lastUpdated.Add(ce.ttl))
+	return ce.ttl > 0 && time.Now().After(ce.expiresAt)
 }
 
 type memoryCache struct {
@@ -67,8 +70,7 @@ func (mc *memoryCache) Get(key string) (interface{}, bool) {
 		mc.Delete(key)
 		return nil, false
 	}
-	cacheEntry.lastAccessed = time.Now()
-	cacheEntry.accessCount.Add(1)
+
 	mc.list.moveToFront(item)
 	// Return the value and true to indicate success.
 	return cacheEntry.value, true
@@ -83,24 +85,18 @@ func (mc *memoryCache) Set(key string, value interface{}, ttl time.Duration) err
 		entry := listItem.value
 		// The entry already exists, so update it.
 		entry.value = value
-		entry.lastUpdated = now
-		entry.lastAccessed = now
-		entry.accessCount.Add(1)
 		mc.list.moveToFront(listItem)
 		return nil
 	}
 	// Create a new cache entry.
 	entry := &cacheEntry{
-		key:          key,
-		value:        value,
-		created:      now,
-		lastUpdated:  now,
-		lastAccessed: now,
-		accessCount:  atomic.Uint64{},
+		key:   key,
+		value: value,
 	}
 	// Set the TTL if one was provided.
 	if ttl != 0 {
 		entry.ttl = ttl
+		entry.expiresAt = now.Add(ttl)
 	}
 
 	mc.evictIfNeeded()
